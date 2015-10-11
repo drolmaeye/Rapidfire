@@ -190,9 +190,11 @@ class Actions:
             (xtal6, 'C6'),
             (xtal7, 'C7'),
             (xtal8, 'C8'),
-            (xtal9, 'C9')]
+            (xtal9, 'C9'),
+            (xtal8, 'C10'),
+            (xtal9, 'C11')]
         # loop for multiple diffraction spot collection
-        for sample, c_designation, xtal_collect in sample_rows:
+        for sample, c_designation in sample_rows:
             if sample.collect.get():
                 # if positions are blank, move to next crystal
                 if sample.x.get() == '':
@@ -200,7 +202,7 @@ class Actions:
                 # move to Cx position for data collection, settle, fire trigger, wait for exposure time
                 index += 1
                 sample.move_to()
-                time.sleep(0.25)
+                time.sleep(0.3)
                 trigger.put(1)
                 time_stamp = time.strftime('%d %b %Y %H:%M:%S', time.localtime())
                 time.sleep(self.exp_time.get() + 0.003)
@@ -247,6 +249,11 @@ def path_warn():
     tkMessageBox.showwarning('Invalid Path Name',
                              'Please modify selection and try again')
 
+
+def put_time(**kwargs):
+    exptime = pilatus_exposuretime.get()
+    do.exp_time.set(exptime)
+
 '''
 Program start, define primary UI
 '''
@@ -262,6 +269,7 @@ mW = Motor('XPSGP:m2')
 trigger = PV('16IDB:BNC1:run')
 pilatus_filename = PV('HP1M-PIL1:cam1:FileName')
 pilatus_filenumber = PV('HP1M-PIL1:cam1:FileNumber')
+pilatus_exposuretime = PV('HP1M-PIL1:cam1:AcquireTime', callback=put_time)
 
 # define frames
 frameFiles = Frame(root)
@@ -282,6 +290,9 @@ xtal6 = CrystalSpot(frameCrystalSpot, label='C6')
 xtal7 = CrystalSpot(frameCrystalSpot, label='C7')
 xtal8 = CrystalSpot(frameCrystalSpot, label='C8')
 xtal9 = CrystalSpot(frameCrystalSpot, label='C9')
+xtal10 = CrystalSpot(frameCrystalSpot, label='C10')
+xtal11 = CrystalSpot(frameCrystalSpot, label='C11')
 do = Actions(frameControl)
 
+put_time()
 root.mainloop()
