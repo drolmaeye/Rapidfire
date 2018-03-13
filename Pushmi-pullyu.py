@@ -100,7 +100,7 @@ def close_quit():
     quit()
 
 
-# ###def path_warn():
+#  ###def path_warn():
 # ###    tkMessageBox.showwarning('Invalid Path Name',
 # ###                             'Please modify selection and try again')
 
