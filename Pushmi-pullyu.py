@@ -26,13 +26,14 @@ class RampControl:
         self.pace2_p_readback = DoubleVar()
         self.pace2_p_setpoint = DoubleVar()
         self.pace2_slewrate = DoubleVar()
-        self.pace2_delay_after_start = DoubleVar()
         self.pace3_flag = IntVar()
         self.pace3_direction = StringVar()
         self.pace3_p_readback = DoubleVar()
         self.pace3_p_setpoint = DoubleVar()
         self.pace3_slewrate = DoubleVar()
-        self.pace3_delay_after_start = DoubleVar()
+        self.activate_first = StringVar()
+        self.activate_first.set('NONE')
+        self.delay_after_start = DoubleVar()
         self.row_task = StringVar()
         self.row_task.set('Disabled')
 
@@ -45,63 +46,66 @@ class RampControl:
         self.row_task_label.grid(row=0, rowspan=5, column=0, padx=10)
         # PACE_2 widgets (is this the best way?)
         self.delay_on_start_label = Label(self.frame, text='Delay on start')
-        self.delay_on_start_label.grid(row=0, column=2)
+        self.delay_on_start_label.grid(row=0, column=3)
         self.delay_on_start_entry = Entry(self.frame, textvariable=self.delay_on_start, width=8)
-        self.delay_on_start_entry.grid(row=0, column=3)
+        self.delay_on_start_entry.grid(row=0, column=4)
         self.pace2_label = Label(self.frame, text='PACE_2')
         self.pace2_label.grid(row=2, column=1, padx=10)
         self.pace2_checkbox = Checkbutton(self.frame, text='Enable', variable=self.pace2_flag)
         self.pace2_checkbox.grid(row=2, column=2)
+        self.pace2_activate_first_button = Radiobutton(self.frame, text='Activate PACE_2 first',
+                                                       variable=self.activate_first, value='2')
+        self.pace2_activate_first_button.grid(row=2, column=3)
         self.pace2_direction_label = Label(self.frame, text='P(direction)', width=12, anchor=E)
-        self.pace2_direction_label.grid(row=2, column=3, padx=10)
+        self.pace2_direction_label.grid(row=2, column=4, padx=10)
         self.pace2_direction_dropdown = OptionMenu(self.frame, self.pace2_direction, 'Up', 'Down')
         self.pace2_direction_dropdown.config(state=DISABLED)
-        self.pace2_direction_dropdown.grid(row=2, column=4)
+        self.pace2_direction_dropdown.grid(row=2, column=5)
         self.pace2_p_readback_label = Label(self.frame, text='Pressure', width=12, anchor=E)
-        self.pace2_p_readback_label.grid(row=1, column=5, padx=10)
+        self.pace2_p_readback_label.grid(row=1, column=6, padx=10)
         self.pace2_p_readback_display = Label(self.frame, textvariable=self.pace2_p_readback)
-        self.pace2_p_readback_display.grid(row=1, column=6)
+        self.pace2_p_readback_display.grid(row=1, column=7)
         self.pace2_p_setpoint_label = Label(self.frame, text='Setpoint', width=12, anchor=E)
-        self.pace2_p_setpoint_label.grid(row=2, column=5, padx=10)
+        self.pace2_p_setpoint_label.grid(row=2, column=6, padx=10)
         self.pace2_p_setpoint_entry = Entry(self.frame, textvariable=self.pace2_p_setpoint, width=8)
-        self.pace2_p_setpoint_entry.grid(row=2, column=6)
+        self.pace2_p_setpoint_entry.grid(row=2, column=7)
         self.pace2_slewrate_label = Label(self.frame, text='Ramp Rate', width=12, anchor=E)
-        self.pace2_slewrate_label.grid(row=2, column=7, padx=10)
+        self.pace2_slewrate_label.grid(row=2, column=8, padx=10)
         self.pace2_slewrate_entry = Entry(self.frame, textvariable=self.pace2_slewrate, width=8)
-        self.pace2_slewrate_entry.grid(row=2, column=8)
-        self.pace2_delay_after_start_label = Label(self.frame, text='Delay after start', width=12, anchor=E)
-        self.pace2_delay_after_start_label.grid(row=2, column=9, padx=10)
-        self.pace2_delay_after_start_entry = Entry(self.frame, textvariable=self.pace2_delay_after_start, width=8)
-        self.pace2_delay_after_start_entry.grid(row=2, column=10)
+        self.pace2_slewrate_entry.grid(row=2, column=9)
         # PACE_3 widgets
         self.pace3_label = Label(self.frame, text='PACE_3')
         self.pace3_label.grid(row=4, column=1)
         self.pace3_checkbox = Checkbutton(self.frame, text='Enable', variable=self.pace3_flag)
         self.pace3_checkbox.grid(row=4, column=2)
+        self.pace3_activate_first_button = Radiobutton(self.frame, text='Activate PACE_3 first',
+                                                       variable=self.activate_first, value='3')
+        self.pace3_activate_first_button.grid(row=4, column=3)
         self.pace3_direction_label = Label(self.frame, text='P(direction)', width=12, anchor=E)
-        self.pace3_direction_label.grid(row=4, column=3, padx=10)
+        self.pace3_direction_label.grid(row=4, column=4, padx=10)
         self.pace3_direction_dropdown = OptionMenu(self.frame, self.pace3_direction, 'Up', 'Down')
         self.pace3_direction_dropdown.config(state=DISABLED)
-        self.pace3_direction_dropdown.grid(row=4, column=4)
+        self.pace3_direction_dropdown.grid(row=4, column=5)
         self.pace3_p_readback_label = Label(self.frame, text='Pressure', width=12, anchor=E)
-        self.pace3_p_readback_label.grid(row=3, column=5, padx=10)
+        self.pace3_p_readback_label.grid(row=3, column=6, padx=10)
         self.pace3_p_readback_display = Label(self.frame, textvariable=self.pace3_p_readback)
-        self.pace3_p_readback_display.grid(row=3, column=6)
+        self.pace3_p_readback_display.grid(row=3, column=7)
         self.pace3_p_setpoint_label = Label(self.frame, text='Setpoint', width=12, anchor=E)
-        self.pace3_p_setpoint_label.grid(row=4, column=5, padx=10)
+        self.pace3_p_setpoint_label.grid(row=4, column=6, padx=10)
         self.pace3_p_setpoint_entry = Entry(self.frame, textvariable=self.pace3_p_setpoint, width=8)
-        self.pace3_p_setpoint_entry.grid(row=4, column=6)
+        self.pace3_p_setpoint_entry.grid(row=4, column=7)
         self.pace3_slewrate_label = Label(self.frame, text='Ramp Rate', width=12, anchor=E)
-        self.pace3_slewrate_label.grid(row=4, column=7, padx=10)
+        self.pace3_slewrate_label.grid(row=4, column=8, padx=10)
         self.pace3_slewrate_entry = Entry(self.frame, textvariable=self.pace3_slewrate, width=8)
-        self.pace3_slewrate_entry.grid(row=4, column=8)
-        self.pace3_delay_after_start_label = Label(self.frame, text='Delay after start', width=12, anchor=E)
-        self.pace3_delay_after_start_label.grid(row=4, column=9, padx=10)
-        self.pace3_delay_after_start_entry = Entry(self.frame, textvariable=self.pace3_delay_after_start, width=8)
-        self.pace3_delay_after_start_entry.grid(row=4, column=10)
+        self.pace3_slewrate_entry.grid(row=4, column=9)
+
         # row task display
+        self.delay_after_start_label = Label(self.frame, text='Delay after start', width=12, anchor=E)
+        self.delay_after_start_label.grid(row=1, rowspan=4, column=10, padx=10)
+        self.delay_after_start_entry = Entry(self.frame, textvariable=self.delay_after_start, width=8)
+        self.delay_after_start_entry.grid(row=1, rowspan=4, column=11)
         self.row_task_display_label = Label(self.frame, textvariable=self.row_task, font=self.bigfont, relief=SUNKEN, padx=20, pady=20)
-        self.row_task_display_label.grid(row=0, rowspan=5, column=11, padx=20)
+        self.row_task_display_label.grid(row=0, rowspan=5, column=12, padx=20)
 
     def direction_setter(self, *args):
         direction = self.pace2_direction.get()
@@ -130,7 +134,7 @@ class Actions:
                                   font=self.bigfont, command=self.load_ramp)
         self.button_load.grid(row=0, column=0, padx=8, pady=20)
         self.button_start = Button(self.frame, text='Start', height=2, width=14,
-                                   font=self.bigfont, command=self.start_ramp)
+                                   font=self.bigfont, command=start_ramp)
         self.button_start.config(state=DISABLED)
         self.button_start.grid(row=0, column=1, padx=8, pady=20)
         self.quit_button = Button(self.frame, text='Quit', height=2, width=14,
@@ -249,12 +253,70 @@ class Actions:
                 ramp2.row_task_display_label.config(bg='SystemButtonFace')
                 idle_warn()
                 return
+        self.button_start.config(state=NORMAL)
 
 
     def start_ramp(self):
         pass
 
 
+# start_ramp
+def start_ramp():
+    if not tkMessageBox.askyesno('Confirm Ramp Execution',
+                                  message=('Warning: software is about to execute ramp (de)compression. \n\n'
+                                           'Please confirm the following: \n'
+                                           '1. Pilatus detector is properly configured for your data collection. \n'
+                                           '2. The four Enable checkboxes are appropriately (de)selected. \n'
+                                           '3. Your setpoints and the resulting (de)compression action is correct. \n\n'
+                                           'Do you want to proceed?')):
+        action.button_start.config(state=DISABLED)
+        return
+    print 'You foolisghly went ahead'
+    # quick preflight
+    for ramp in [ramp1, ramp2]:
+        if ramp.pace2_flag.get() and ramp.pace3_flag.get():
+            if ramp.activate_first.get() == 'NONE':
+                tkMessageBox.showwarning('Select first membrane', message='You must select which controller to activate first.')
+                return
+    # load ramp1 values
+    if ramp1.pace2_flag.get():
+        pass
+        # #pace2 measure mode
+        # #pace2 slew rate
+        # #pace2 setpoint
+    if ramp1.pace3_flag.get():
+        pass
+        # #pace3 measure mode
+        # #pace3 slew rate
+        # #pace3 setpoint
+
+
+    ############### START HERE ##################
+
+
+
+
+
+    if ramp1.pace3_flag.get():
+        pass
+        # #pace3 measure mode
+        # #pace3 slew rate set
+        # #pace3 setpoint set
+
+    # #
+    # #start detector
+    time.sleep(ramp1.delay_on_start.get())
+    # #pace2 measure mode
+    # #pace3 measure mode
+    # #
+    # #
+    # #
+    # #
+    # #
+    # #
+    # #
+    # #
+    # #
 
 
 
