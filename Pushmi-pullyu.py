@@ -372,24 +372,6 @@ def membrane_warn():
     tkMessageBox.showwarning('Membrane Fight',
                              message='One or more pairs of membranes are working against each other')
 
-# ###def path_warn():
-# ###    tkMessageBox.showwarning('Invalid Path Name',
-# ###                             'Please modify selection and try again')
-
-
-# ###def write_pressure(**kwargs):
-# ###    newpressure = pace_setpoint.get()
-# ###    prefix.pressure.set(newpressure)
-
-
-# ###def put_time(**kwargs):
-# ###    exptime = pilatus_exposuretime.get()
-# ###    do.exp_time.set(exptime)
-
-
-# ###def put_period(**kwargs):
-# ###    acqperiod = pilatus_acquireperiod.get()
-# ###    do.acq_period.set(acqperiod)
 
 '''
 Program start, define primary UI
