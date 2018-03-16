@@ -2,11 +2,9 @@ __author__ = 'j.smith'
 
 from Tkinter import *
 import tkMessageBox
-import tkFileDialog
 import tkFont
 from epics import *
 import time
-import os.path
 
 
 class RampControl:
@@ -39,7 +37,6 @@ class RampControl:
 
         # set up trace
         self.pace2_direction.trace('w', self.direction_setter)
-
 
         # make widgets
         self.row_task_label = Label(self.frame, text=label, relief=RIDGE, padx=10, pady=10)
@@ -104,7 +101,8 @@ class RampControl:
         self.delay_after_start_label.grid(row=1, rowspan=4, column=10, padx=10)
         self.delay_after_start_entry = Entry(self.frame, textvariable=self.delay_after_start, width=8)
         self.delay_after_start_entry.grid(row=1, rowspan=4, column=11)
-        self.row_task_display_label = Label(self.frame, textvariable=self.row_task, font=self.bigfont, relief=SUNKEN, padx=20, pady=20)
+        self.row_task_display_label = Label(self.frame, textvariable=self.row_task, font=self.bigfont,
+                                            relief=SUNKEN, padx=20, pady=20)
         self.row_task_display_label.grid(row=0, rowspan=5, column=12, padx=20)
 
     def direction_setter(self, *args):
@@ -197,7 +195,8 @@ class Actions:
                 idle_warn()
                 return
         else:
-            tkMessageBox.showwarning('Ramp One Idle', message='You must enable at last one pressure controller to execute Ramp One')
+            tkMessageBox.showwarning('Ramp One Idle',
+                                     message='You must enable at last one pressure controller to execute Ramp One')
             return
         # check ramp2 job
         # first determine if pace2 is used
@@ -256,68 +255,107 @@ class Actions:
         self.button_start.config(state=NORMAL)
 
 
-    def start_ramp(self):
-        pass
-
-
 # start_ramp
 def start_ramp():
     if not tkMessageBox.askyesno('Confirm Ramp Execution',
-                                  message=('Warning: software is about to execute ramp (de)compression. \n\n'
-                                           'Please confirm the following: \n'
-                                           '1. Pilatus detector is properly configured for your data collection. \n'
-                                           '2. The four Enable checkboxes are appropriately (de)selected. \n'
-                                           '3. Your setpoints and the resulting (de)compression action is correct. \n\n'
-                                           'Do you want to proceed?')):
+                                 message=('Warning: software is about to execute ramp (de)compression. \n\n'
+                                          'Please confirm the following: \n'
+                                          '1. Pilatus detector is properly configured for your data collection. \n'
+                                          '2. The four Enable checkboxes are appropriately (de)selected. \n'
+                                          '3. Your setpoints and the resulting (de)compression action is correct. \n\n'
+                                          'Do you want to proceed?')):
         action.button_start.config(state=DISABLED)
         return
-    print 'You foolisghly went ahead'
     # quick preflight
     for ramp in [ramp1, ramp2]:
         if ramp.pace2_flag.get() and ramp.pace3_flag.get():
             if ramp.activate_first.get() == 'NONE':
-                tkMessageBox.showwarning('Select first membrane', message='You must select which controller to activate first.')
+                tkMessageBox.showwarning('Select first membrane',
+                                         message='You must select which controller to activate first.')
                 return
     # load ramp1 values
     if ramp1.pace2_flag.get():
-        pass
-        # #pace2 measure mode
-        # #pace2 slew rate
-        # #pace2 setpoint
+        pace2.put('Control', '0', wait=True)
+        pace2.put('Slew', ramp1.pace2_slewrate.get(), wait=True)
+        pace2.put('Setpoint', ramp1.pace2_p_setpoint.get(), wait=True)
     if ramp1.pace3_flag.get():
-        pass
-        # #pace3 measure mode
-        # #pace3 slew rate
-        # #pace3 setpoint
-
-
-    ############### START HERE ##################
-
-
-
-
-
-    if ramp1.pace3_flag.get():
-        pass
-        # #pace3 measure mode
-        # #pace3 slew rate set
-        # #pace3 setpoint set
-
-    # #
-    # #start detector
+        pace3.put('Control', '0', wait=True)
+        pace3.put('Slew', ramp1.pace3_slewrate.get(), wait=True)
+        pace3.put('Setpoint', ramp1.pace3_p_setpoint.get(), wait=True)
+    # start firing everything!!
+    pace2_delta = pace2.get('Pressure_RBV') - pace2.get('Setpoint')
+    pace3_delta = pace3.get('Pressure_RBV') - pace3.get('Setpoint')
+    # ###start Pilatus
     time.sleep(ramp1.delay_on_start.get())
-    # #pace2 measure mode
-    # #pace3 measure mode
-    # #
-    # #
-    # #
-    # #
-    # #
-    # #
-    # #
-    # #
-    # #
-
+    if ramp1.pace2_flag.get() and ramp1.pace3_flag.get():
+        if ramp1.activate_first.get() == '2':
+            print 'Pace_2 first'
+            pace2.put('Control', '1', wait=True)
+            time.sleep(ramp1.delay_after_start.get())
+            pace3.put('Control', '1', wait=True)
+        elif ramp1.activate_first.get() == '3':
+            print 'Pace_3 first'
+            pace3.put('Control', '1', wait=True)
+            time.sleep(ramp1.delay_after_start.get())
+            pace2.put('Control', '1', wait=True)
+        while abs(pace2_delta) > 0.01 or abs(pace3_delta) > 0.01:
+            time.sleep(0.1)
+            pace2_delta = pace2.get('Pressure_RBV') - pace2.get('Setpoint')
+            pace3_delta = pace3.get('Pressure_RBV') - pace3.get('Setpoint')
+            print pace2_delta
+            print pace3_delta
+    elif ramp1.pace2_flag.get():
+        pace2.put('Control', '1', wait=True)
+        while abs(pace2_delta) > 0.01:
+            time.sleep(0.1)
+            pace2_delta = pace2.get('Pressure_RBV') - pace2.get('Setpoint')
+            print pace2_delta
+    elif ramp1.pace3_flag.get():
+        pace3.put('Control', '1', wait=True)
+        while abs(pace3_delta) > 0.01:
+            time.sleep(0.1)
+            pace3_delta = pace3.get('Pressure_RBV') - pace3.get('Setpoint')
+            print pace3_delta
+    print 'Ramp One complete'
+    if ramp2.pace2_flag.get() or ramp2.pace3_flag.get():
+        time.sleep(ramp2.delay_on_start.get())
+        if ramp2.pace2_flag.get() and ramp2.pace3_flag.get():
+            pace2.put('Slew', ramp2.pace2_slewrate.get(), wait=True)
+            pace3.put('Slew', ramp2.pace3_slewrate.get(), wait=True)
+            if ramp2.activate_first.get() == '2':
+                pace2.put('Setpoint', ramp2.pace2_p_setpoint.get(), wait=True)
+                time.sleep(ramp2.delay_after_start.get())
+                pace3.put('Setpoint', ramp2.pace3_p_setpoint.get(), wait=True)
+            elif ramp2.activate_first.get() == '3':
+                pace3.put('Setpoint', ramp2.pace3_p_setpoint.get(), wait=True)
+                time.sleep(ramp2.delay_after_start.get())
+                pace2.put('Setpoint', ramp2.pace2_p_setpoint.get(), wait=True)
+            while abs(pace2_delta) > 0.01 or abs(pace3_delta) > 0.01:
+                time.sleep(0.1)
+                pace2_delta = pace2.get('Pressure_RBV') - pace2.get('Setpoint')
+                pace3_delta = pace3.get('Pressure_RBV') - pace3.get('Setpoint')
+                print pace2_delta
+                print pace3_delta
+        elif ramp2.pace2_flag.get():
+            pace2.put('Slew', ramp2.pace2_slewrate.get(), wait=True)
+            pace2.put('Setpoint', ramp2.pace2_p_setpoint.get(), wait=True)
+            while abs(pace2_delta) > 0.01:
+                time.sleep(0.1)
+                pace2_delta = pace2.get('Pressure_RBV') - pace2.get('Setpoint')
+                print pace2_delta
+        elif ramp2.pace3_flag.get():
+            pace3.put('Slew', ramp2.pace3_slewrate.get(), wait=True)
+            pace3.put('Setpoint', ramp2.pace3_p_setpoint.get(), wait=True)
+            while abs(pace3_delta) > 0.01:
+                time.sleep(0.1)
+                pace3_delta = pace3.get('Pressure_RBV') - pace3.get('Setpoint')
+                print pace3_delta
+        print 'Ramp Two complete'
+    while detector.get('Acquire'):
+        print 'Pilatus still acquiring'
+        time.sleep(1)
+    action.button_start.config(state=DISABLED)
+    print 'Ramp execution complete'
 
 
 # define basic functions
@@ -326,11 +364,13 @@ def close_quit():
 
 
 def idle_warn():
-    tkMessageBox.showwarning('Idle Membrane', message='One or more membranes are enabled, but pressure values result in no effect')
+    tkMessageBox.showwarning('Idle Membrane',
+                             message='One or more membranes are enabled, but pressure values result in no effect')
 
 
 def membrane_warn():
-    tkMessageBox.showwarning('Membrane Fight', message='One or more pairs of membranes are working against each other')
+    tkMessageBox.showwarning('Membrane Fight',
+                             message='One or more pairs of membranes are working against each other')
 
 # ###def path_warn():
 # ###    tkMessageBox.showwarning('Invalid Path Name',
@@ -357,10 +397,14 @@ Program start, define primary UI
 root = Tk()
 root.title('Pushmi-pullyu')
 
-# initialize pace controller PVs
-# initialize PACE_2
+# initialize pace controller PVs using epics.Device
+pace_args = ['Pressure_RBV', 'Setpoint', 'Control', 'Slew']
 
-# initialize PACE_3
+pace2 = Device('16PACE_2:PC2:', pace_args)
+pace3 = Device('16PACE_3:PC3:', pace_args)
+
+# detector acquire PV
+detector = PV('HP1M-PIL1:cam1:Acquire')
 
 # main objects
 ramp1 = RampControl(root, 'Ramp One')
